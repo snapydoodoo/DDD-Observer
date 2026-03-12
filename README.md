@@ -1,100 +1,64 @@
-# Strong Typing in TypeScript for robust domain-driven design
+# DDD + Observer Pattern: Inventory Management 🚀
 
-## PREVIOUS KNOWLEDGE
+This project demonstrates how to implement **Domain-Driven Design (DDD)** principles using the **Observer Pattern**. The goal is to keep the "Business Logic" (the Domain) pure and isolated from "Side Effects" (Infrastructure/Technical concerns) like logging, UI updates, or external notifications.
 
-1. Running code in TypeScript with Node.js
-2. Basic TypeScript types (number, string, boolean, etc.)
-3. Functions and type annotations
-4. Type safety and compile-time checks
-5. Factory functions
-6. Smart constructors
-7. Value objects
-8. Entities
-9. Observer Pattern
+---
 
-## Exercise Domain-Driven Design & Strong Typing in TypeScript
+## 🏗 Project Architecture
 
-## What You Will Learn
+We follow a layered approach to ensure the code is maintainable and testable:
 
-| ---- Concept --------------     | -------- What it solves ---------------------------------                                             |
-| ------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| -- **Branded Types** --         | Prevent mixing up values that share the same primitive type (e.g., Email vs Phone)                    |
-| -- **Smart Constructors** --    | Validate business rules at creation time so invalid values never exist                                |
-| -- **Value Objects** --         | Model domain concepts (Money, Email, OperatingHours) as immutable types defined by their value        |
-| -- **Entities** --              | Model things with identity and lifecycle (Table, Order) that enforce their own invariants             |
-| -- **Parse, Don't Validate** -- | Transform raw input into guaranteed-valid types at the boundary, then trust the types everywhere else |
+* **/domain**: Contains the **Aggregate Roots** and **Entities**. This layer has zero dependencies. It only cares about business rules (e.g., `Product.ts`).
+* **/observers**: Contains the **Domain Event Handlers**. These are the "listeners" that react when something happens in the domain (e.g., `InventoryHandlers.ts`).
+* **index.ts**: The **Application Service** that wires the domain objects to their observers and executes the use cases.
 
-## Project Structure
+---
 
-```
-ex-01/
-  index.ts                      # CLI runner -- runs functions here
-```
+## 🛠 Business Rules (The Domain)
 
+In this E-Commerce example, we manage **Product Stock** with the following constraints:
 
-### Getting Started
+1.  **Integrity**: A product's `StockLevel` can never drop below zero. If an order exceeds available stock, the domain throws an explicit `Error`.
+2.  **State Change**: When `reduceStock(quantity)` is called, the state updates and notifies all subscribers.
+3.  **Reactivity**: 
+    * **Low Stock**: If stock falls below 5, a "Reorder" process is triggered.
+    * **Out of Stock**: If stock hits 0, the UI is notified to mark the item as "Unavailable."
 
-```bash
-# Install dependencies
-npm install
+---
 
-# Run the exercises
-npm run exercises
-```
+## 🔧 Technical Setup & ESM Imports
 
-Select an exercise (1-8) or run all of them (9). After running, open `silent_errors.log` to see every silent bug that was triggered.
+This project uses **ES Modules (ESM)** with `nodenext` module resolution. 
 
-### How each exercise works
+> [!IMPORTANT]
+> **Mandatory Extensions:** Because of TypeScript's strict ESM requirements, **all relative imports must include the `.js` extension**, even though the source files are `.ts`.
+>
+> * ✅ `import { Product } from "./domain/Product.js";`
+> * ❌ `import { Product } from "./domain/Product";`
 
-Each exercise file follows the same structure:
+### Quick Start
+1.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+2.  **Run the project:**
+    ```bash
+    npm start
+    ```
 
-1. **Header comments** explain the anti-pattern and the DDD concept that fixes it.
-2. **A HINT block** shows a concrete code example of the solution pattern.
-3. **A TODO comment** tells you exactly what to change.
-4. **The buggy code** demonstrates the problem in action.
+---
 
-### Your task for each exercise:
+## 📝 Implementation Logic
 
-1. **Read** the header comments to understand the anti-pattern and the fix.
-2. **Implement** the branded type / Value Object / Entity described in the hint.
-3. **Refactor** the exercise function to use your new types.
-4. **Verify** that the previously-silent bugs now produce either compile-time errors or runtime exceptions.
+The implementation follows a 3-phase approach:
 
-### Example -- fixing Exercise 1 (Price)
+1.  **Phase 1 (The Rule):** Inside `reduceStock()`, we check if `quantity > stock`.
+2.  **Phase 2 (The Hook):** After updating state, we call `this.notifyObservers()`.
+3.  **Phase 3 (The Plug):** In `index.ts`, we "plug in" external functions like `LowStockObserver` to react to those changes without cluttering the Domain file.
 
-Before (primitive):
+---
 
-```ts
-type MenuItem = {
-	name: string
-	price: number // accepts -50, no complaints
-	quantity: number
-}
-```
+## 📂 Documentation
 
-After (branded type):
-
-```ts
-type Price = number & { readonly __brand: unique symbol }
-
-function createPrice(amount: number): Price {
-	if (amount < 0) throw new Error("Price cannot be negative")
-	if (amount > 10_000) throw new Error("Price exceeds maximum")
-	return amount as Price
-}
-
-type MenuItem = {
-	name: string
-	price: Price // only accepts values from createPrice()
-	quantity: number
-}
-```
-
-Now `price: -50` is a compile-time error (a raw `number` is not assignable to `Price`), and `createPrice(-50)` throws at runtime. The bug is impossible.
-
-## Key Takeaways
-
-- **Make illegal states unrepresentable.** If a value should never be negative, make the type reject negatives. If two fields should not be swappable, give them different types.
-- **Push validation to the boundary.** Parse raw input (user forms, API responses, database rows) into strong domain types at the edge of your system. Inside the domain, trust the types.
-- **Domain logic belongs inside domain objects.** An `OperatingHours` object should know how to answer "am I open at 2 AM?". A `Money` object should know how to add two amounts in the same currency. Don't scatter this logic across utility functions.
-- **Types are documentation.** When a function takes `Price` instead of `number`, its intent is clear without comments. When a function takes `Email` instead of `string`, you know the value has been validated.
+Detailed domain logic flow and class diagrams can be found in:
+👉 `/docs/domain-logic.md`
