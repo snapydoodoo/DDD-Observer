@@ -1,7 +1,7 @@
 {
 	"name": "ex-01",
 	"version": "1.0.0",
-	"description": "",
+	"description": "1. Running code in TypeScript with Node.js\r 2. Basic TypeScript types (number, string, boolean, etc.)\r 3. Functions and type annotations\r 4. Type safety and compile-time checks\r 5. Factory functions\r 6. Smart constructors\r 7. Value objects\r 8. Entities\r 9. Observer Pattern",
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
@@ -16,5 +16,17 @@
 	},
 	"dependencies": {
 		"uuid": "^13.0.0"
-	}
+	},
+	"directories": {
+		"doc": "docs"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/snapydoodoo/DDD-Observer.git"
+	},
+	"keywords": [],
+	"bugs": {
+		"url": "https://github.com/snapydoodoo/DDD-Observer/issues"
+	},
+	"homepage": "https://github.com/snapydoodoo/DDD-Observer#readme"
 }

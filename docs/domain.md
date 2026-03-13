@@ -1,15 +1,12 @@
-# E-Commerce: Inventory & Stock Management
+# Domain Logic: Inventory Management
 
-This is a classic "reactive" system. The domain doesn't care how a notification is sent;
-it only cares that the stock level has changed.
+## Business Rules
+1. **Integrity:** Stock cannot be reduced below 0.
+2. **Reactivity:** The Domain notifies the system when stock changes, but does not handle the "how" (Email, SMS, DB updates).
 
-## The Entity: Product
+## Pattern: Observer
+We use the **Observer Pattern** to decouple the `Product` entity from infrastructure concerns.
+- **Subject:** `Product` class.
+- **Observers:** Functions that react to `StockLevel` changes.
 
-The Business Rule: A product's StockLevel must never drop below zero. If an order exceeds available stock, throw an exception.
 
-The State Change: Product.ReduceStock(quantity)
-
-## Observer Opportunities
-
-- Low Stock Observer: If stock falls below 5, trigger a "Reorder" process.
-- Out of Stock Observer: If stock hits 0, update the website to mark the item as "Unavailable."
